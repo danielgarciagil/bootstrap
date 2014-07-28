@@ -36,14 +36,21 @@ angular.module('ui.bootstrap.tabs', [])
   };
 
   ctrl.removeTab = function removeTab(tab) {
-    var index = tabs.indexOf(tab);
-    //Select a new tab if the tab to be removed is selected
-    if (tab.active && tabs.length > 1) {
-      //If this is the last tab, select the previous tab. else, the next tab.
-      var newActiveIndex = index == tabs.length - 1 ? index - 1 : index + 1;
-      ctrl.select(tabs[newActiveIndex]);
+    if( ! $scope.destroying ){
+      var index = tabs.indexOf(tab);
+      //Select a new tab if the tab to be removed is selected
+      if (tab.active && tabs.length > 1) {
+        //If this is the last tab, select the previous tab. else, the next tab.
+        var newActiveIndex = index == tabs.length - 1 ? index - 1 : index + 1;
+        ctrl.select(tabs[newActiveIndex]);
+      }
+      tabs.splice(index, 1);
     }
-    tabs.splice(index, 1);
+  };
+
+  ctrl.destroyTabset = function destroyTabset() {
+    $scope.destroying = true;
+    tabs = [];
   };
 }])
 
@@ -90,6 +97,10 @@ angular.module('ui.bootstrap.tabs', [])
     link: function(scope, element, attrs) {
       scope.vertical = angular.isDefined(attrs.vertical) ? scope.$parent.$eval(attrs.vertical) : false;
       scope.justified = angular.isDefined(attrs.justified) ? scope.$parent.$eval(attrs.justified) : false;
+      scope.destroying = false;
+      scope.$on('$destroy', function() {
+        ctrl.destroyTabset();
+      });
     }
   };
 })
